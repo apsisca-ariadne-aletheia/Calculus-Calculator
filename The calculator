@@ -1,0 +1,88 @@
+pip install sympy
+
+from sympy import symbols, diff, integrate, simplify
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkinter import Tk, Entry, Button, Label, StringVar, ttk, Frame
+
+class CalculatorApp:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Derivative and Integral Calculator")
+        
+        self.setup_gui()
+
+    def setup_gui(self):
+        # Entry widget for the function
+        self.entry = Entry(self.master, width=30)
+        self.entry.grid(row=0, column=0, columnspan=3, pady=10)
+
+        # Derivative button
+        btn_derivative = Button(self.master, text="Calculate Derivative", command=self.calculate_derivative)
+        btn_derivative.grid(row=1, column=0, pady=5)
+
+        # Integral button
+        btn_integral = Button(self.master, text="Calculate Integral", command=self.calculate_integral)
+        btn_integral.grid(row=1, column=1, pady=5)
+
+        # Plot button
+        btn_plot = Button(self.master, text="Plot Function", command=self.plot_function)
+        btn_plot.grid(row=1, column=2, pady=5)
+
+        # Result label
+        self.result = StringVar()
+        label_result = Label(self.master, textvariable=self.result)
+        label_result.grid(row=2, column=0, columnspan=3, pady=10)
+
+    def calculate_derivative(self):
+        function = self.entry.get()
+        x = symbols('x')
+        
+        try:
+            expression = simplify(function)
+            derivative = diff(expression, x)
+            self.result.set(f"Derivative: {derivative}")
+        except:
+            self.result.set("Error")
+
+    def calculate_integral(self):
+        function = self.entry.get()
+        x = symbols('x')
+        
+        try:
+            expression = simplify(function)
+            integral = integrate(expression, x)
+            self.result.set(f"Integral: {integral}")
+        except:
+            self.result.set("Error")
+
+    def plot_function(self):
+        function = self.entry.get()
+        x = symbols('x')
+
+        try:
+            expression = simplify(function)
+            plt.figure(figsize=(6, 4))
+            x_vals = [val/10.0 for val in range(-100, 101)]  # Values from -10 to 10
+            y_vals = [expression.subs(x, val) for val in x_vals]
+
+            plt.plot(x_vals, y_vals, label=f'Function: {function}')
+            plt.title('Function Plot')
+            plt.xlabel('x')
+            plt.ylabel('y')
+            plt.legend()
+
+            # Embedding the plot in the Tkinter window
+            self.plot_frame = ttk.Frame(self.master)
+            self.plot_frame.grid(row=3, column=0, columnspan=3)
+            canvas = FigureCanvasTkAgg(plt.gcf(), master=self.plot_frame)
+            canvas.draw()
+            canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
+
+        except:
+            self.result.set("Error in plotting")
+
+if __name__ == "__main__":
+    root = Tk()
+    app = CalculatorApp(root)
+    root.mainloop()
